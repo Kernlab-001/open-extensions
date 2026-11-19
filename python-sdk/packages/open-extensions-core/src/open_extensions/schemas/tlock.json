@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:open-extensions:spec:tlock:0.1.0",
+  "title": "TLOCK 0.1.0 header",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "format_version",
+    "file_id",
+    "created_at",
+    "cipher",
+    "nonce",
+    "ciphertext_length",
+    "payload_media_type",
+    "payload_sha256",
+    "policy",
+    "key_access"
+  ],
+  "properties": {
+    "format": {
+      "const": "tlock"
+    },
+    "format_version": {
+      "const": "0.1.0"
+    },
+    "file_id": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 128
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "cipher": {
+      "const": "AES-256-GCM"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{16}$"
+    },
+    "ciphertext_length": {
+      "type": "integer",
+      "minimum": 17
+    },
+    "payload_media_type": {
+      "type": "string"
+    },
+    "payload_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enforcement",
+        "policy_id"
+      ],
+      "properties": {
+        "not_before": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "max_authorized_opens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "enforcement": {
+          "enum": [
+            "server",
+            "advisory-local"
+          ]
+        },
+        "policy_id": {
+          "type": "string"
+        }
+      }
+    },
+    "key_access": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "service_origin",
+            "key_id",
+            "grant_protocol"
+          ],
+          "properties": {
+            "mode": {
+              "const": "server"
+            },
+            "service_origin": {
+              "type": "string",
+              "pattern": "^https://[^/*]+$"
+            },
+            "key_id": {
+              "type": "string"
+            },
+            "grant_protocol": {
+              "const": "open-extensions-tlock-grant-0.1"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "recipient_envelopes"
+          ],
+          "properties": {
+            "mode": {
+              "const": "passkey-local"
+            },
+            "recipient_envelopes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "recipient_id",
+                  "credential_id_hash",
+                  "prf_salt",
+                  "wrap_nonce",
+                  "wrapped_key"
+                ],
+                "properties": {
+                  "recipient_id": {
+                    "type": "string"
+                  },
+                  "credential_id_hash": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{43}$"
+                  },
+                  "prf_salt": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{43}$"
+                  },
+                  "wrap_nonce": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{16}$"
+                  },
+                  "wrapped_key": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{64}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "extensions": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "key_access": {
+            "properties": {
+              "mode": {
+                "const": "server"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "policy": {
+            "properties": {
+              "enforcement": {
+                "const": "server"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "key_access": {
+            "properties": {
+              "mode": {
+                "const": "passkey-local"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "policy": {
+            "properties": {
+              "enforcement": {
+                "const": "advisory-local"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

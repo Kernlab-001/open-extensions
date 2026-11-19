@@ -1,7 +1,17 @@
 version: 2
 updates:
+  # Each distribution has its own pyproject.toml, so Dependabot is pointed at
+  # the package directories rather than at python-sdk/.
   - package-ecosystem: pip
-    directory: /python-sdk
+    directories:
+      - /python-sdk/packages/open-extensions
+      - /python-sdk/packages/open-extensions-core
+      - /python-sdk/packages/open-extensions-memx
+      - /python-sdk/packages/open-extensions-stepx
+      - /python-sdk/packages/open-extensions-gridv
+      - /python-sdk/packages/open-extensions-podx
+      - /python-sdk/packages/open-extensions-wapp
+      - /python-sdk/packages/open-extensions-tlock
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

@@ -359,15 +359,32 @@ def read_zip_member(archive: zipfile.ZipFile, name: str, max_bytes: int) -> byte
 def find_specs_dir() -> Path | None:
     """Locate the repository's ``specs`` directory when running from a checkout.
 
-    Returns ``None`` for an installed wheel, where the specs are not shipped.
-    The ``OPEN_EXTENSIONS_SPECS_DIR`` environment variable overrides the search.
+    Returns ``None`` when the specs are not reachable, which is the normal
+    case for a wheel installed from PyPI: the JSON Schemas ship with the
+    repository, not with the package. Set ``OPEN_EXTENSIONS_SPECS_DIR`` to
+    point at them explicitly.
+
+    Three locations are tried, in order: the environment override, the
+    directories above this file (a source checkout or an editable install),
+    and the directories above the current working directory (a non-editable
+    install used from inside a checkout).
     """
     override = os.environ.get("OPEN_EXTENSIONS_SPECS_DIR")
     if override:
         candidate = Path(override)
         return candidate if candidate.is_dir() else None
+
     here = Path(__file__).resolve()
     for parent in here.parents:
+        candidate = parent / "specs"
+        if candidate.is_dir() and (candidate / "common").is_dir():
+            return candidate
+
+    try:
+        cwd = Path.cwd().resolve()
+    except OSError:  # pragma: no cover - the working directory may be gone
+        return None
+    for parent in cwd.parents:
         candidate = parent / "specs"
         if candidate.is_dir() and (candidate / "common").is_dir():
             return candidate
@@ -375,7 +392,16 @@ def find_specs_dir() -> Path | None:
 
 
 def load_schema(format_name: str) -> dict[str, Any] | None:
-    """Load a format's JSON Schema from a checkout, if one is available."""
+    """Load a format's JSON Schema.
+
+    The schemas ship inside the ``open-extensions-core`` package, so schema
+    validation works for a plain ``pip install`` and not only inside a
+    checkout. A checkout is used as a fallback, and the packaged copy is
+    checked against it by the test suite.
+    """
+    packaged = Path(__file__).resolve().parent / "schemas" / f"{format_name}.json"
+    if packaged.is_file():
+        return json.loads(packaged.read_text(encoding="utf-8"))
     specs = find_specs_dir()
     if specs is None:
         return None

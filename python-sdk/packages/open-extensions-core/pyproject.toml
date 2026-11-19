@@ -38,3 +38,8 @@ Issues = "https://github.com/Kernlab-001/open-extensions/issues"
 where = ["src"]
 include = ["open_extensions*"]
 namespaces = true
+
+[tool.setuptools.package-data]
+# The JSON Schemas ship with the package so that schema validation works for
+# a plain pip install, not only inside a checkout.
+"open_extensions.schemas" = ["*.json"]
