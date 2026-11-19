@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:open-extensions:spec:gridv:0.1.0",
+  "title": "GRIDV 0.1.0 event",
+  "type": "object", "additionalProperties": false,
+  "required": ["seq", "event_id", "recorded_at", "actor_id", "op", "data"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 1 }, "event_id": { "type": "string", "minLength": 1 },
+    "recorded_at": { "type": "string", "format": "date-time", "pattern": "Z$" }, "actor_id": { "type": "string", "minLength": 1 },
+    "op": { "enum": ["workbook.create", "sheet.add", "sheet.remove", "sheet.rename", "row.insert", "row.delete", "column.insert", "column.delete", "cell.set", "formula.set", "style.set", "checkpoint"] },
+    "data": { "type": "object" }
+  }
+}
