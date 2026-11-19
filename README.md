@@ -4,18 +4,18 @@
 
 Open Extensions is an open-source proposal to make files carry more of the structure and behavior that modern applications currently scatter across sidecars, databases, cloud accounts, and application-specific exports.
 
-> **Project status: early design / alpha.** The `.memx` v0.1 Python reference implementation is executable and tested. The other five formats have draft specifications only. None of the formats should be treated as a mature or independently audited standard yet.
+> **Project status: early design / alpha.** All six formats now have an executable Python v0.1 implementation with a test suite. There is still **no second-language implementation, no shared conformance vectors, and no independent security audit**, so none of these should be treated as a mature or interoperable standard yet. Two capabilities are deliberately absent and are explained below: `.wapp` has no runtime, and `.tlock` has no key service.
 
 ## The six formats
 
 | Extension | Goal | What the file carries | Current status |
 |---|---|---|---|
 | **`.memx`** | Portable AI memory | Encrypted user preferences, coding profiles, and selected context as a versioned JSON payload | Python SDK + CLI + tests for v0.1 |
-| **`.podx`** | Multi-track interactive audio | Separate audio stems, word-level transcript timing, speaker metadata, and chapters | Draft spec |
-| **`.wapp`** | Offline web-app capsule | HTML/CSS/JS/assets, declared permissions, and optional seed SQLite database | Draft spec; runtime is a separate required component |
-| **`.stepx`** | Interactive instructions | Ingredients/parts, exact quantities, step dependencies, timers, and conditional substitutions | Draft spec |
-| **`.tlock`** | Policy-bearing encrypted vault | Encrypted payload plus recipient and time/open policy metadata | Security design draft; key-envelope suite is a release blocker |
-| **`.gridv`** | Time-travel spreadsheet | Append-only spreadsheet operation log, hash chain, checkpoints, and pinned formula profile | Draft spec |
+| **`.stepx`** | Interactive instructions | Ingredients/parts, exact quantities, step dependencies, timers, and conditional substitutions | Python SDK + CLI + tests for v0.1 |
+| **`.gridv`** | Time-travel spreadsheet | Append-only spreadsheet operation log, hash chain, checkpoints, and pinned formula profile | Python SDK + CLI + tests for v0.1. The formula profile is *pinned*, not evaluated |
+| **`.podx`** | Multi-track interactive audio | Separate audio stems, word-level transcript timing, speaker metadata, and chapters | Python SDK + CLI + tests for v0.1. No renderer or player — out of scope in v0.1 |
+| **`.wapp`** | Offline web-app capsule | HTML/CSS/JS/assets, declared permissions, and optional seed SQLite database | Python SDK + CLI + tests for v0.1. **No runtime** — the CLI ships only a development inspection server |
+| **`.tlock`** | Policy-bearing encrypted vault | Encrypted payload plus recipient and time/open policy metadata | Python SDK + CLI + tests for v0.1. `passkey-local` works offline; `server` needs a key service that does not exist yet |
 
 The file extensions are proposals; this repository does not claim that the formats have been registered with IANA, adopted by platforms, or standardized by an external standards body.
 
@@ -55,26 +55,62 @@ open-extensions/
 │   ├── tlock/0.1.0/{spec.md,schema.json}
 │   └── gridv/0.1.0/{spec.md,schema.json}
 ├── python-sdk/
-│   ├── pyproject.toml
+│   ├── packages/
+│   │   ├── open-extensions/          # meta distribution: all six formats
+│   │   ├── open-extensions-core/     # shared helpers + the CLI
+│   │   ├── open-extensions-memx/     # open_extensions/memx.py
+│   │   ├── open-extensions-stepx/    # open_extensions/stepx.py
+│   │   ├── open-extensions-gridv/    # open_extensions/gridv.py
+│   │   ├── open-extensions-podx/     # open_extensions/podx.py
+│   │   ├── open-extensions-wapp/     # open_extensions/wapp.py
+│   │   └── open-extensions-tlock/    # open_extensions/tlock.py
 │   ├── README.md
-│   ├── src/open_extensions/{__init__.py,memx.py,cli.py}
-│   └── tests/test_memx.py
+│   └── tests/
 ├── js-sdk/                 # reserved for the interoperable JS implementation
 ├── cli/                    # cross-SDK CLI entry points and packaging notes
 └── examples/               # synthetic, non-sensitive examples for each format
 ```
 
+Every distribution contributes to the shared `open_extensions` namespace package, so they can be installed together or one at a time.
+
 ## Installation
 
 Requires **Python 3.10 or newer**.
 
-> **Not on PyPI yet.** `pip install open-extensions` does **not** work — the package has not been published to PyPI. Use one of the methods below.
+> **Published to PyPI on release.** The `open-extensions` distribution installs every format; each format is also published on its own as `open-extensions-<format>`.
 
-| Method | Use it when | What it touches |
-|---|---|---|
-| **A. Editable install from a clone** | You want to edit the SDK or contribute | Your venv, linked to your checkout |
-| **B. Install straight from GitHub** | You only want to use the CLI | Your venv |
-| **C. No install** | You just want to try it | Nothing — it runs from the checkout |
+### Install from PyPI
+
+Each format is published as its own distribution, and one meta distribution
+installs all six. Pick whichever fits:
+
+```bash
+pip install open-extensions            # all six formats + the CLI
+pip install open-extensions-memx       # only .memx
+pip install open-extensions-stepx      # only .stepx
+pip install open-extensions-gridv      # only .gridv
+pip install open-extensions-podx       # only .podx
+pip install open-extensions-wapp       # only .wapp
+pip install open-extensions-tlock      # only .tlock
+```
+
+They all contribute to the same `open_extensions` namespace package, so they
+can be mixed freely:
+
+```bash
+pip install open-extensions-memx open-extensions-stepx
+```
+
+Every distribution brings the `open-extensions` command, which adapts to
+whichever formats are installed. A single-format install also gets its own
+short command, for example `open-extensions-memx`.
+
+Import a format from its own module:
+
+```python
+from open_extensions.memx import create_memx, read_memx
+from open_extensions.stepx import create_stepx, scale_stepx
+```
 
 ### A. Editable install from a clone
 
@@ -86,28 +122,28 @@ python -m venv .venv
 # Windows:        .venv\Scripts\activate
 # macOS / Linux:  source .venv/bin/activate
 
-python -m pip install -e .
+for p in packages/*/; do python -m pip install --no-deps -e "$p"; done
+python -m pip install jsonschema argon2-cffi cryptography pytest
 ```
 
-This pulls in `argon2-cffi` and `cryptography`, and places an `open-extensions` command on your `PATH`. Confirm it:
+Each distribution lives in its own directory under `python-sdk/packages/`.
+`--no-deps` is needed because the per-format distributions depend on each
+other and are not on PyPI yet.
+
+Confirm it:
 
 ```bash
 open-extensions --help
 ```
 
-Note that `pyproject.toml` lives in `python-sdk/`, not at the repository root — run `pip` from inside that directory.
-
 ### B. Install straight from GitHub
 
 ```bash
-python -m venv .venv
-# Windows:        .venv\Scripts\activate
-# macOS / Linux:  source .venv/bin/activate
-
-python -m pip install "git+https://github.com/Kernlab-001/open-extensions.git#subdirectory=python-sdk"
+python -m pip install "git+https://github.com/Kernlab-001/open-extensions.git#subdirectory=python-sdk/packages/open-extensions"
 ```
 
-The `#subdirectory=python-sdk` part is required: the Python package lives in `python-sdk/` inside the repository, not at its root.
+Each format can be installed the same way by pointing at its own directory,
+for example `#subdirectory=python-sdk/packages/open-extensions-memx`.
 
 ### C. No install — run the launcher
 
@@ -115,10 +151,11 @@ From a clone, without modifying any environment:
 
 ```bash
 # macOS / Linux
-PYTHONPATH=python-sdk/src python cli/open-extensions.py --help
+PYTHONPATH=python-sdk/packages/open-extensions-core/src:python-sdk/packages/open-extensions-memx/src \
+  python cli/open-extensions.py --help
 
 # Windows (PowerShell)
-$env:PYTHONPATH = "python-sdk/src"
+$env:PYTHONPATH = "python-sdk/packages/open-extensions-core/src;python-sdk/packages/open-extensions-memx/src"
 python cli\open-extensions.py --help
 ```
 
@@ -127,15 +164,17 @@ On Windows, `cli\open-extensions.cmd` is an equivalent launcher. It uses whichev
 ### Uninstall
 
 ```bash
-python -m pip uninstall open-extensions
+python -m pip uninstall open-extensions            # the combined install
+python -m pip uninstall open-extensions-memx       # or a single format
 ```
 
-This removes both the `open-extensions` command and the importable `open_extensions` package. Your `.memx` files and any other data you created are **not** touched.
+This removes the commands and the importable modules. Your `.memx` files and
+any other data you created are **not** touched.
 
 To see what is currently installed:
 
 ```bash
-python -m pip show open-extensions
+python -m pip list | grep open-extensions
 ```
 
 If you installed into a dedicated virtual environment, deleting the environment is the most complete removal:
@@ -151,26 +190,88 @@ Two cleanup notes:
 - An editable install leaves a `python-sdk/src/open_extensions.egg-info/` directory in your checkout. It is already covered by `.gitignore`, so it never shows up in `git status`, and it is safe to delete.
 - `pip uninstall` does not remove the dependencies (`argon2-cffi`, `cryptography`). Remove them with `python -m pip uninstall argon2-cffi cryptography` only if nothing else on your machine depends on them.
 
+## Command-line interface
+
+Commands are namespaced by format. After installing (see [Installation](#installation) above):
+
+```bash
+open-extensions --help
+open-extensions memx --help
+```
+
+| Format | Commands |
+|---|---|
+| `.memx` | `create`, `read`, `validate [--verify]`, `inspect` |
+| `.stepx` | `create`, `validate`, `inspect`, `scale --yield N`, `render --format text\|markdown` |
+| `.gridv` | `init`, `append --event`, `validate`, `inspect`, `log`, `diff --from --to`, `checkout --seq`, `export`, `recover` |
+| `.podx` | `pack --manifest`, `validate`, `inspect`, `list-tracks`, `extract` |
+| `.wapp` | `pack --manifest`, `validate`, `inspect`, `list`, `extract`, `run` |
+| `.tlock` | `create --mode`, `open --mode`, `validate`, `inspect`, `policy` |
+
+The v0.1 flat verbs (`memx-create`, `memx-read`, `memx-validate`, `memx-inspect`) still work as aliases.
+
 ## Quick start: `.memx` v0.1
 
-After installing (see [Installation](#installation) above), run these from the repository root:
+Run these from the repository root:
 
 ```bash
 # Encrypt a sample memory payload. The password is prompted interactively.
-open-extensions memx-create examples/memx/minimal.json ./my-memory.memx
+open-extensions memx create examples/memx/minimal.json ./my-memory.memx
 
 # Inspect visible, non-secret header metadata.
-open-extensions memx-inspect ./my-memory.memx
+open-extensions memx inspect ./my-memory.memx
 
 # Check container framing only (not cryptographic integrity).
-open-extensions memx-validate ./my-memory.memx
+open-extensions memx validate ./my-memory.memx
 
 # Authenticate, decrypt, and validate the full payload.
-open-extensions memx-validate --verify ./my-memory.memx
+open-extensions memx validate --verify ./my-memory.memx
 
 # Decrypt to a JSON file.
-open-extensions memx-read ./my-memory.memx --output ./decrypted-memory.json
+open-extensions memx read ./my-memory.memx --output ./decrypted-memory.json
 ```
+
+## Quick start: the other five formats
+
+```bash
+# .stepx — structured instructions with exact decimal scaling
+open-extensions stepx create ./recipe.json ./recipe.stepx
+open-extensions stepx scale ./recipe.stepx --yield 10 --output ./recipe-10.stepx
+open-extensions stepx render ./recipe.stepx --format markdown
+
+# .gridv — append-only workbook history
+open-extensions gridv init my-workbook --state ./initial-state.json -o ./book.gridv
+open-extensions gridv append ./book.gridv --event ./event.json
+open-extensions gridv checkout ./book.gridv --seq 12
+open-extensions gridv export ./book.gridv -o ./book.csv
+
+# .podx — multi-track audio with word-level transcripts
+open-extensions podx pack ./stems --manifest ./manifest.json -o ./session.podx
+open-extensions podx list-tracks ./session.podx
+open-extensions podx extract ./session.podx ./extracted
+
+# .wapp — offline web app package
+open-extensions wapp pack ./site --manifest ./manifest.json -o ./app.wapp
+open-extensions wapp validate ./app.wapp
+open-extensions wapp run ./app.wapp          # development inspection server only
+
+# .tlock — encrypted container with access-policy metadata
+open-extensions tlock create ./payload.bin ./secret.tlock \
+  --policy ./policy.json --mode passkey-local \
+  --recipient alice --credential-id-hash <base64url> --prf-output-file ./prf.b64
+open-extensions tlock open ./secret.tlock --mode passkey-local \
+  --recipient alice --prf-output-file ./prf.b64
+```
+
+### What is deliberately not implemented
+
+These gaps are in the specifications, not oversights in the code:
+
+- **`.gridv` does not evaluate formulas.** The file pins the `nxf-formula-0.1` profile so that a reader never has to guess what another spreadsheet program meant. This implementation stores and returns formula *source strings*. A reader that does not implement the profile may show source formulas and cached values but must not claim to have recalculated them.
+- **`.podx` has no renderer or player.** The v0.1 specification excludes a `render` command until codec dependency and licensing policy is fixed.
+- **`.wapp` has no runtime.** The specification requires a separately installed, operating-system-registered runtime that provides WebView isolation and enforces the declared permission policy. This repository ships a **development inspection server** that serves the package over loopback with the declared CSP. It does **not** enforce permissions, and the packaged JavaScript is untrusted.
+- **`.tlock` has no key service.** The `passkey-local` profile works entirely offline and is fully implemented. The `server` profile implements the client half — ephemeral X25519, HPKE envelope opening, and Ed25519 grant verification — but there is no server to talk to, and the grant request/response schemas remain a published release blocker in the specification.
+- **A WebAuthn ceremony cannot run from a command line.** The `passkey-local` profile takes the 32-byte PRF output as an input, normally obtained from the authenticator.
 
 ### Python API
 
@@ -184,6 +285,19 @@ assert validate_memx(blob, password="a-long-unique-passphrase") == []
 ```
 
 See [`python-sdk/README.md`](python-sdk/README.md) for installation, API details, and CLI behavior. See [`examples/memx/minimal.json`](examples/memx/minimal.json) for a synthetic payload.
+
+Each format has its own module with the same shape — create, read, validate, inspect:
+
+```python
+from open_extensions import (
+    create_memx, read_memx, validate_memx,        # .memx
+    create_stepx, read_stepx, scale_stepx,         # .stepx
+    create_gridv, append_gridv_event, checkout_gridv,  # .gridv
+    create_podx, pack_podx, list_tracks_podx,      # .podx
+    create_wapp, pack_wapp, validate_wapp,         # .wapp
+    create_tlock, open_tlock_passkey,              # .tlock
+)
+```
 
 ## Format design principles
 

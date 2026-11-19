@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-extensions-stepx"
+version = "0.2.0"
+description = "Structured instruction documents with exact decimal scaling (.stepx) for the Open Extensions file-format family"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Open Extensions Contributors" }]
+keywords = ["file-formats", "interoperability", "canonical-json"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: File Formats",
+]
+dependencies = [
+  "open-extensions-core>=0.2.0",
+]
+
+[project.scripts]
+open-extensions-stepx = "open_extensions.cli:main_stepx"
+
+[project.urls]
+Homepage = "https://github.com/Kernlab-001/open-extensions"
+Repository = "https://github.com/Kernlab-001/open-extensions"
+Changelog = "https://github.com/Kernlab-001/open-extensions/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Kernlab-001/open-extensions/issues"
+"Security Policy" = "https://github.com/Kernlab-001/open-extensions/blob/main/SECURITY.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["open_extensions*"]
+namespaces = true

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-extensions"
+version = "0.2.0"
+description = "Every Open Extensions file format in one install: .memx, .stepx, .gridv, .podx, .wapp and .tlock"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Open Extensions Contributors" }]
+keywords = ["file-formats", "memx", "stepx", "gridv", "podx", "wapp", "tlock", "interoperability", "encryption"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: File Formats",
+]
+dependencies = [
+  "open-extensions-core>=0.2.0",
+  "open-extensions-memx>=0.2.0",
+  "open-extensions-stepx>=0.2.0",
+  "open-extensions-gridv>=0.2.0",
+  "open-extensions-podx>=0.2.0",
+  "open-extensions-wapp>=0.2.0",
+  "open-extensions-tlock>=0.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Kernlab-001/open-extensions"
+Repository = "https://github.com/Kernlab-001/open-extensions"
+Changelog = "https://github.com/Kernlab-001/open-extensions/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Kernlab-001/open-extensions/issues"
+"Security Policy" = "https://github.com/Kernlab-001/open-extensions/blob/main/SECURITY.md"
+
+# This distribution ships no Python modules of its own. It exists so that
+# `pip install open-extensions` pulls in all six formats at once.
+[tool.setuptools]
+packages = []

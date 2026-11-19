@@ -19,9 +19,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install SDK and development dependencies
+
+      # Every distribution is installed the same way a user would install it
+      # from PyPI, so the namespace package is exercised exactly as it ships.
+      # --no-deps is used because the per-format distributions depend on each
+      # other and are not on PyPI yet.
+      - name: Install every distribution
         working-directory: python-sdk
-        run: python -m pip install -e ".[dev]"
+        run: |
+          python -m pip install --upgrade pip
+          for p in packages/*/; do
+            python -m pip install --no-deps "$p"
+          done
+          python -m pip install pytest jsonschema argon2-cffi cryptography
+
+      - name: Check that a single format installs on its own
+        working-directory: python-sdk
+        run: |
+          python -m pip install --no-deps ./packages/open-extensions-memx
+          python -c "from open_extensions.memx import create_memx; print('memx alone ok')"
+
       - name: Run unit tests and schema checks
         working-directory: python-sdk
         run: python -m pytest -q

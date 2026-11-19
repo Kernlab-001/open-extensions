@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /python-sdk
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # argon2-cffi and cryptography are the crypto-relevant dependencies.
+      # Keep them in one pull request so a security fix is reviewed as a unit.
+      crypto:
+        patterns:
+          - "argon2-cffi*"
+          - "cryptography*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

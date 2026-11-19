@@ -1,5 +1,29 @@
 # CLI workspace
 
-The initial CLI is shipped by the Python package as the `open-extensions` command. Install it from `python-sdk/` with `python -m pip install -e .`.
+The CLI ships in the `open-extensions-core` distribution as the
+`open-extensions` command. Install it with `pip install open-extensions`, or
+install it from a clone:
 
-Future format-specific commands should be namespaced (`open-extensions memx ...`, `open-extensions podx ...`) once multiple SDKs and plugins exist. The initial v0.1 executable uses explicit verbs (`memx-create`, `memx-read`, `memx-validate`, `memx-inspect`) to keep the command surface stable while only one format is implemented.
+```bash
+cd python-sdk
+for p in packages/*/; do python -m pip install --no-deps -e "$p"; done
+```
+
+Format-specific commands are namespaced:
+
+```bash
+open-extensions memx create payload.json memory.memx
+open-extensions stepx validate recipe.stepx
+open-extensions gridv checkout book.gridv --seq 12
+```
+
+Each format distribution also provides its own short command, for example
+`open-extensions-memx`, which is the same CLI restricted to that format.
+
+The v0.1 flat verbs (`memx-create`, `memx-read`, `memx-validate`,
+`memx-inspect`) remain available as aliases so existing scripts keep working.
+
+The `cli/open-extensions.py` and `cli/open-extensions.cmd` files in this
+directory are convenience launchers for running straight from a checkout
+without installing anything. They need the `open_extensions` namespace on
+`PYTHONPATH`; see the no-install instructions in the root README.
