@@ -11,6 +11,16 @@ python -m venv .venv
 python -m pip install -e .
 ```
 
+The package is not published to PyPI, so `pip install open-extensions` does not work. For install-from-GitHub, no-install, and uninstall instructions, see [Installation and uninstall](../README.md#installation) in the root README.
+
+## Uninstall
+
+```bash
+python -m pip uninstall open-extensions
+```
+
+This removes the `open-extensions` command and the `open_extensions` package. Deleting the virtual environment (`rmdir /s /q .venv` on Windows, `rm -rf .venv` on macOS/Linux) removes it completely, including the `argon2-cffi` and `cryptography` dependencies.
+
 ## CLI
 
 ```bash

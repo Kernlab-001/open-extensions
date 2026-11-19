@@ -64,19 +64,100 @@ open-extensions/
 └── examples/               # synthetic, non-sensitive examples for each format
 ```
 
-## Quick start: `.memx` v0.1
+## Installation
 
-Requires Python 3.10+.
+Requires **Python 3.10 or newer**.
+
+> **Not on PyPI yet.** `pip install open-extensions` does **not** work — the package has not been published to PyPI. Use one of the methods below.
+
+| Method | Use it when | What it touches |
+|---|---|---|
+| **A. Editable install from a clone** | You want to edit the SDK or contribute | Your venv, linked to your checkout |
+| **B. Install straight from GitHub** | You only want to use the CLI | Your venv |
+| **C. No install** | You just want to try it | Nothing — it runs from the checkout |
+
+### A. Editable install from a clone
 
 ```bash
-cd python-sdk
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-python -m pip install -e .
+git clone https://github.com/Kernlab-001/open-extensions.git
+cd open-extensions/python-sdk
 
+python -m venv .venv
+# Windows:        .venv\Scripts\activate
+# macOS / Linux:  source .venv/bin/activate
+
+python -m pip install -e .
+```
+
+This pulls in `argon2-cffi` and `cryptography`, and places an `open-extensions` command on your `PATH`. Confirm it:
+
+```bash
+open-extensions --help
+```
+
+Note that `pyproject.toml` lives in `python-sdk/`, not at the repository root — run `pip` from inside that directory.
+
+### B. Install straight from GitHub
+
+```bash
+python -m venv .venv
+# Windows:        .venv\Scripts\activate
+# macOS / Linux:  source .venv/bin/activate
+
+python -m pip install "git+https://github.com/Kernlab-001/open-extensions.git#subdirectory=python-sdk"
+```
+
+The `#subdirectory=python-sdk` part is required: the Python package lives in `python-sdk/` inside the repository, not at its root.
+
+### C. No install — run the launcher
+
+From a clone, without modifying any environment:
+
+```bash
+# macOS / Linux
+PYTHONPATH=python-sdk/src python cli/open-extensions.py --help
+
+# Windows (PowerShell)
+$env:PYTHONPATH = "python-sdk/src"
+python cli\open-extensions.py --help
+```
+
+On Windows, `cli\open-extensions.cmd` is an equivalent launcher. It uses whichever `python` comes first on your `PATH`, so it works once a venv containing the package is activated.
+
+### Uninstall
+
+```bash
+python -m pip uninstall open-extensions
+```
+
+This removes both the `open-extensions` command and the importable `open_extensions` package. Your `.memx` files and any other data you created are **not** touched.
+
+To see what is currently installed:
+
+```bash
+python -m pip show open-extensions
+```
+
+If you installed into a dedicated virtual environment, deleting the environment is the most complete removal:
+
+```bash
+# Windows (cmd):        rmdir /s /q .venv
+# Windows (PowerShell): Remove-Item -Recurse -Force .venv
+# macOS / Linux:        rm -rf .venv
+```
+
+Two cleanup notes:
+
+- An editable install leaves a `python-sdk/src/open_extensions.egg-info/` directory in your checkout. It is already covered by `.gitignore`, so it never shows up in `git status`, and it is safe to delete.
+- `pip uninstall` does not remove the dependencies (`argon2-cffi`, `cryptography`). Remove them with `python -m pip uninstall argon2-cffi cryptography` only if nothing else on your machine depends on them.
+
+## Quick start: `.memx` v0.1
+
+After installing (see [Installation](#installation) above), run these from the repository root:
+
+```bash
 # Encrypt a sample memory payload. The password is prompted interactively.
-open-extensions memx-create ../examples/memx/minimal.json ./my-memory.memx
+open-extensions memx-create examples/memx/minimal.json ./my-memory.memx
 
 # Inspect visible, non-secret header metadata.
 open-extensions memx-inspect ./my-memory.memx
