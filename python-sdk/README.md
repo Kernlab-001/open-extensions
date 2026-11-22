@@ -65,31 +65,37 @@ Commands are namespaced by format. The `open-extensions` command adapts to
 whichever formats are installed:
 
 ```bash
-open-extensions memx create ../examples/memx/minimal.json ./private-memory.memx
-open-extensions memx inspect ./private-memory.memx
-open-extensions memx validate ./private-memory.memx
-open-extensions memx validate --verify ./private-memory.memx
-open-extensions memx read ./private-memory.memx --output ./decrypted.json
+# Copy the bundled example files into the current directory first.
+open-extensions examples memx --write .
+open-extensions examples stepx --write .
 
-open-extensions stepx create ./recipe.json ./recipe.stepx
-open-extensions stepx scale ./recipe.stepx --yield 10
-open-extensions stepx render ./recipe.stepx --format markdown
+open-extensions memx create memx/minimal.json private-memory.memx
+open-extensions memx inspect private-memory.memx
+open-extensions memx validate private-memory.memx
+open-extensions memx validate --verify private-memory.memx
+open-extensions memx read private-memory.memx --output decrypted.json
 
-open-extensions gridv init my-workbook --state ./initial.json -o ./book.gridv
-open-extensions gridv append ./book.gridv --event ./event.json
-open-extensions gridv checkout ./book.gridv --seq 12
-open-extensions gridv export ./book.gridv -o ./book.csv
+open-extensions stepx create stepx/pancakes.json recipe.stepx
+open-extensions stepx scale recipe.stepx --yield 10
+open-extensions stepx render recipe.stepx --format markdown
 
-open-extensions podx pack ./stems --manifest ./manifest.json -o ./session.podx
-open-extensions podx list-tracks ./session.podx
+open-extensions gridv init my-workbook --state gridv/initial-state.json -o book.gridv
+open-extensions gridv append book.gridv --event gridv/cell-event.json
+open-extensions gridv checkout book.gridv --seq 2
+open-extensions gridv export book.gridv -o book.csv
 
-open-extensions wapp pack ./site --manifest ./manifest.json -o ./app.wapp
-open-extensions wapp validate ./app.wapp
+open-extensions podx pack podx --manifest podx/manifest.json -o session.podx
+open-extensions podx list-tracks session.podx
 
-open-extensions tlock create ./payload.bin ./secret.tlock --policy ./policy.json \
-  --mode passkey-local --recipient alice --credential-id-hash <base64url> \
-  --prf-output-file ./prf.b64
+open-extensions wapp pack wapp --manifest wapp/manifest.json -o app.wapp
+open-extensions wapp validate app.wapp
+
+open-extensions tlock create tlock/payload.txt secret.tlock --policy tlock/policy.json --mode passkey-local --recipient alice --credential-id-hash AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --prf-output-file tlock/prf-output.b64
 ```
+
+Every command is a single line, so it works unchanged in bash, PowerShell
+and cmd. A trailing `\` continues a line in bash only; PowerShell uses a
+backtick instead.
 
 The v0.1 flat verbs (`memx-create`, `memx-read`, `memx-validate`,
 `memx-inspect`) remain available as aliases.

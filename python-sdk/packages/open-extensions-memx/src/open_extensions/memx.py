@@ -23,6 +23,8 @@ from argon2.low_level import Type, hash_secret_raw
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+from ._container import ContainerError, FormatError, ValidationError
+
 MAGIC = b"MEMX\r\n\x1a\n"  # 8 bytes
 FORMAT_VERSION = "0.1.0"
 SCHEMA_URI = "urn:open-extensions:spec:memx:0.1.0"
@@ -50,11 +52,11 @@ _B64URL_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 _TIMESTAMP_RE = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$")
 
 
-class MemxError(Exception):
+class MemxError(ContainerError):
     """Base class for MEMX errors."""
 
 
-class MemxFormatError(MemxError):
+class MemxFormatError(MemxError, FormatError):
     """The container framing or header is invalid or unsupported."""
 
 
@@ -66,7 +68,7 @@ class MemxPayloadError(MemxError):
     """The decrypted payload is malformed or invalid."""
 
 
-class MemxValidationError(MemxPayloadError):
+class MemxValidationError(MemxPayloadError, ValidationError):
     """The supplied payload does not satisfy the v0.1 data model."""
 
     def __init__(self, errors: list[str]):

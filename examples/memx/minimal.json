@@ -1,46 +1,29 @@
 {
   "memx_version": "0.1.0",
-  "exported_at": "2026-11-19T12:00:00Z",
-  "source": {
-    "application": "sample-exporter",
-    "model": "sample-model"
-  },
+  "exported_at": "2026-01-01T00:00:00Z",
   "profiles": [
     {
-      "id": "default",
-      "label": "Default profile",
+      "id": "example-profile",
+      "label": "Example profile",
       "preferences": {
-        "response_style": "clear, structured, and concise",
-        "preferred_language": "en"
+        "tone": "concise"
       },
       "coding_profiles": {
         "python": {
-          "style_guide": "Use type hints, small functions, and explicit error handling.",
-          "formatting": {
-            "line_length": 100
-          },
-          "examples": [
-            "def add(a: int, b: int) -> int: return a + b"
-          ]
+          "style_guide": "Follow PEP 8."
         }
       },
       "context_items": [
         {
-          "id": "sample-project",
-          "kind": "project",
-          "content": "A synthetic example project context. Replace this with information the user explicitly chooses to export.",
-          "updated_at": "2026-11-19T12:00:00Z",
-          "tags": ["sample", "project"]
-        },
-        {
-          "id": "sample-workflow",
-          "kind": "workflow",
-          "content": "A synthetic workflow preference used to demonstrate the data structure.",
-          "updated_at": "2026-11-19T12:00:00Z",
-          "tags": ["sample"]
+          "id": "ctx-1",
+          "kind": "preference",
+          "content": "Prefer short, concrete answers.",
+          "updated_at": "2026-01-01T00:00:00Z",
+          "tags": [
+            "style"
+          ]
         }
       ]
     }
-  ],
-  "extensions": {}
+  ]
 }

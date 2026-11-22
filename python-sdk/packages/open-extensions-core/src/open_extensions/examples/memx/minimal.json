@@ -1,0 +1,29 @@
+{
+  "memx_version": "0.1.0",
+  "exported_at": "2026-01-01T00:00:00Z",
+  "profiles": [
+    {
+      "id": "example-profile",
+      "label": "Example profile",
+      "preferences": {
+        "tone": "concise"
+      },
+      "coding_profiles": {
+        "python": {
+          "style_guide": "Follow PEP 8."
+        }
+      },
+      "context_items": [
+        {
+          "id": "ctx-1",
+          "kind": "preference",
+          "content": "Prefer short, concrete answers.",
+          "updated_at": "2026-01-01T00:00:00Z",
+          "tags": [
+            "style"
+          ]
+        }
+      ]
+    }
+  ]
+}

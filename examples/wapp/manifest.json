@@ -1,0 +1,35 @@
+{
+  "format": "wapp",
+  "format_version": "0.1.0",
+  "app_id": "example-app",
+  "name": "Example app",
+  "app_version": "1.0.0",
+  "runtime_min": "0.1.0",
+  "entrypoint": "app/index.html",
+  "files": [
+    {
+      "path": "app/index.html",
+      "byte_length": 232,
+      "sha256": "10569a5c66284f893018c635bb13c45384b861b98cee892960cdfc0a41470bd4",
+      "media_type": "text/html"
+    },
+    {
+      "path": "app/style.css",
+      "byte_length": 72,
+      "sha256": "d281e170e98ec0f3395094adc4c7c59323f5f18316aba08861d91a5c6a8dbf48",
+      "media_type": "text/css"
+    }
+  ],
+  "permissions": [],
+  "network": {
+    "mode": "deny",
+    "allowed_origins": []
+  },
+  "security": {
+    "csp": "default-src 'none'; style-src 'self'; img-src 'self' data:; connect-src 'self'",
+    "allow_inline_scripts": false,
+    "allow_eval": false,
+    "allow_popups": false,
+    "external_navigation": "deny"
+  }
+}

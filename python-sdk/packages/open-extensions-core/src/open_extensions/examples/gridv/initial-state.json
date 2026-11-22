@@ -1,0 +1,21 @@
+{
+  "sheets": [
+    {
+      "id": "sheet-1",
+      "name": "Numbers",
+      "rows": [
+        {
+          "id": "row-1"
+        }
+      ],
+      "columns": [
+        {
+          "id": "col-1"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "locale": "en-US"
+  }
+}

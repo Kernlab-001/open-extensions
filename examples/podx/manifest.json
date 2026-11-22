@@ -1,0 +1,61 @@
+{
+  "format": "podx",
+  "format_version": "0.1.0",
+  "title": "Example session",
+  "timebase_hz": 48000,
+  "duration_ticks": 48000,
+  "tracks": [
+    {
+      "id": "track-1",
+      "kind": "voice",
+      "path": "tracks/dialogue.opus",
+      "media_type": "audio/ogg",
+      "codec": "opus-ogg",
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "start_tick": 0,
+      "duration_ticks": 48000,
+      "sha256": "410d810d2e848bd27f461aba867b9b0df0d47151a550cc2ffafb4ceae3e08701",
+      "byte_length": 512
+    },
+    {
+      "id": "track-2",
+      "kind": "music",
+      "path": "tracks/music.flac",
+      "media_type": "audio/flac",
+      "codec": "flac",
+      "sample_rate_hz": 48000,
+      "channels": 2,
+      "start_tick": 0,
+      "duration_ticks": 48000,
+      "sha256": "d9facbc7201d3bf52e35a93448f37384f7689f079bef374ee6c0d73779acaccf",
+      "byte_length": 488
+    }
+  ],
+  "transcript": {
+    "words": [
+      {
+        "start_tick": 0,
+        "end_tick": 4800,
+        "text": "hello",
+        "track_id": "track-1",
+        "speaker_id": "speaker-1"
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "Intro",
+      "start_tick": 0,
+      "end_tick": 48000
+    }
+  ],
+  "speakers": [
+    {
+      "id": "speaker-1",
+      "label": "Narrator",
+      "locale": "en-US"
+    }
+  ]
+}

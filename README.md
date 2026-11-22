@@ -210,58 +210,100 @@ open-extensions memx --help
 
 The v0.1 flat verbs (`memx-create`, `memx-read`, `memx-validate`, `memx-inspect`) still work as aliases.
 
-## Quick start: `.memx` v0.1
+## Quick start: every format, runnable
 
-Run these from the repository root:
-
-```bash
-# Encrypt a sample memory payload. The password is prompted interactively.
-open-extensions memx create examples/memx/minimal.json ./my-memory.memx
-
-# Inspect visible, non-secret header metadata.
-open-extensions memx inspect ./my-memory.memx
-
-# Check container framing only (not cryptographic integrity).
-open-extensions memx validate ./my-memory.memx
-
-# Authenticate, decrypt, and validate the full payload.
-open-extensions memx validate --verify ./my-memory.memx
-
-# Decrypt to a JSON file.
-open-extensions memx read ./my-memory.memx --output ./decrypted-memory.json
-```
-
-## Quick start: the other five formats
+The SDK ships a set of synthetic example files for every format. Copy them
+into a working directory first, then run the commands below there:
 
 ```bash
-# .stepx — structured instructions with exact decimal scaling
-open-extensions stepx create ./recipe.json ./recipe.stepx
-open-extensions stepx scale ./recipe.stepx --yield 10 --output ./recipe-10.stepx
-open-extensions stepx render ./recipe.stepx --format markdown
-
-# .gridv — append-only workbook history
-open-extensions gridv init my-workbook --state ./initial-state.json -o ./book.gridv
-open-extensions gridv append ./book.gridv --event ./event.json
-open-extensions gridv checkout ./book.gridv --seq 12
-open-extensions gridv export ./book.gridv -o ./book.csv
-
-# .podx — multi-track audio with word-level transcripts
-open-extensions podx pack ./stems --manifest ./manifest.json -o ./session.podx
-open-extensions podx list-tracks ./session.podx
-open-extensions podx extract ./session.podx ./extracted
-
-# .wapp — offline web app package
-open-extensions wapp pack ./site --manifest ./manifest.json -o ./app.wapp
-open-extensions wapp validate ./app.wapp
-open-extensions wapp run ./app.wapp          # development inspection server only
-
-# .tlock — encrypted container with access-policy metadata
-open-extensions tlock create ./payload.bin ./secret.tlock \
-  --policy ./policy.json --mode passkey-local \
-  --recipient alice --credential-id-hash <base64url> --prf-output-file ./prf.b64
-open-extensions tlock open ./secret.tlock --mode passkey-local \
-  --recipient alice --prf-output-file ./prf.b64
+open-extensions examples memx --write .
+open-extensions examples stepx --write .
+open-extensions examples gridv --write .
+open-extensions examples podx --write .
+open-extensions examples wapp --write .
+open-extensions examples tlock --write .
 ```
+
+`open-extensions examples <format>` without `--write` prints the paths of the
+bundled files instead of copying them.
+
+Every command below is a **single line**, so it works unchanged in bash,
+PowerShell and cmd. Do not use a trailing `\` to continue a line: that is a
+bash convention, and PowerShell uses a backtick (`` ` ``) instead.
+
+### `.memx` — portable AI memory
+
+```bash
+open-extensions memx create memx/minimal.json my-memory.memx
+open-extensions memx inspect my-memory.memx
+open-extensions memx validate my-memory.memx
+open-extensions memx validate --verify my-memory.memx
+open-extensions memx read my-memory.memx --output decrypted-memory.json
+```
+
+`memx create` and `memx read` prompt for the password interactively.
+
+### `.stepx` — structured instructions
+
+```bash
+open-extensions stepx create stepx/pancakes.json recipe.stepx
+open-extensions stepx validate recipe.stepx
+open-extensions stepx inspect recipe.stepx
+open-extensions stepx scale recipe.stepx --yield 10 --output recipe-10.stepx
+open-extensions stepx render recipe.stepx --format markdown
+```
+
+### `.gridv` — append-only workbook history
+
+```bash
+open-extensions gridv init my-workbook --state gridv/initial-state.json -o book.gridv
+open-extensions gridv append book.gridv --event gridv/cell-event.json
+open-extensions gridv validate book.gridv
+open-extensions gridv inspect book.gridv
+open-extensions gridv log book.gridv
+open-extensions gridv diff book.gridv --from 0 --to 2
+open-extensions gridv checkout book.gridv --seq 2
+open-extensions gridv export book.gridv -o book.csv
+open-extensions gridv recover book.gridv -o recovered.gridv
+```
+
+### `.podx` — multi-track audio with transcripts
+
+```bash
+open-extensions podx pack podx --manifest podx/manifest.json -o session.podx
+open-extensions podx validate session.podx
+open-extensions podx inspect session.podx
+open-extensions podx list-tracks session.podx
+open-extensions podx extract session.podx podx-extracted
+```
+
+### `.wapp` — offline web app package
+
+```bash
+open-extensions wapp pack wapp --manifest wapp/manifest.json -o app.wapp
+open-extensions wapp validate app.wapp
+open-extensions wapp inspect app.wapp
+open-extensions wapp list app.wapp
+open-extensions wapp extract app.wapp wapp-extracted
+open-extensions wapp run app.wapp
+```
+
+`wapp run` starts a local development inspection server on the loopback
+interface. It is **not** a security-enforcing runtime.
+
+### `.tlock` — encrypted container with policy metadata
+
+```bash
+open-extensions tlock create tlock/payload.txt secret.tlock --policy tlock/policy.json --mode passkey-local --recipient alice --credential-id-hash AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --prf-output-file tlock/prf-output.b64
+open-extensions tlock validate secret.tlock
+open-extensions tlock inspect secret.tlock
+open-extensions tlock policy secret.tlock
+open-extensions tlock open secret.tlock --mode passkey-local --recipient alice --prf-output-file tlock/prf-output.b64
+```
+
+The bundled `tlock/prf-output.b64` is a **synthetic stand-in** for a WebAuthn
+PRF output. In real use it comes from the authenticator, and it should never
+be passed on the command line. Use `--prf-output-file` or `--prf-output-env`.
 
 ### What is deliberately not implemented
 

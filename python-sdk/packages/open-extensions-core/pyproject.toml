@@ -40,6 +40,7 @@ include = ["open_extensions*"]
 namespaces = true
 
 [tool.setuptools.package-data]
+"open_extensions.examples" = ["**/*"]
 # The JSON Schemas ship with the package so that schema validation works for
 # a plain pip install, not only inside a checkout.
 "open_extensions.schemas" = ["*.json"]

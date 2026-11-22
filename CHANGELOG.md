@@ -18,9 +18,17 @@ All notable changes to Open Extensions are recorded here. Format versions (for e
 - A shared container module providing canonical JSON, bounded framing, defensive parsing, exact-decimal helpers, and ZIP archive-safety rules used by every format module.
 - Namespaced CLI commands (`open-extensions <format> <command>`) for all six formats. The v0.1 flat verbs (`memx-create`, `memx-read`, `memx-validate`, `memx-inspect`) remain available as aliases.
 - `jsonschema` moved from a development extra to a runtime dependency, because the validators now apply each format's JSON Schema.
+- `open-extensions examples <format>` lists the example files that ship with the SDK, and `--write DIR` copies them out. The format directory is preserved, so the example paths in the documentation are the paths a user actually ends up with.
+- Every format now ships a set of synthetic example files under `examples/`, including `.stepx`, `.gridv`, `.podx`, `.wapp` and `.tlock` examples that did not exist before.
+
+### Fixed
+- **`.memx` errors are no longer unhandled.** `MemxError` inherited directly from `Exception`, so `MemxFormatError` was not caught by the command line's error handler and a missing file produced a Python traceback. The MEMX error classes now build on the shared `ContainerError` and `FormatError` base classes, like every other format.
+- The command line checks that an input file exists before prompting for a password, so `memx validate --verify` on a missing file reports the missing file instead of waiting for a password.
+- The JSON Schemas now ship inside `open-extensions-core`, so schema validation works for a plain `pip install` and not only inside a checkout.
 
 ### Changed
 - **The flat import API is gone.** Because the distributions now share a namespace package, `open_extensions` must not contain an `__init__.py`, or it would become a regular package and hide the other distributions' modules. Import a format from its own module instead: `from open_extensions.memx import create_memx` rather than `from open_extensions import create_memx`.
+- The documented command examples are now single lines and start by copying the bundled examples with `open-extensions examples <format> --write .`, so they run unchanged in bash, PowerShell and cmd. The previous examples used a trailing `\` to continue a line, which is a bash convention that PowerShell does not support.
 
 ### Limitations
 - There is still no second-language implementation, so no format has been tested against an independent reader.

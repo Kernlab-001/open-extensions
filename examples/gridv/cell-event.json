@@ -1,0 +1,17 @@
+{
+  "seq": 2,
+  "event_id": "evt-000000000002",
+  "recorded_at": "2026-01-01T00:00:00Z",
+  "actor_id": "example",
+  "op": "cell.set",
+  "data": {
+    "sheet_id": "sheet-1",
+    "row_id": "row-1",
+    "column_id": "col-1",
+    "cell_id": "cell-1",
+    "value": {
+      "type": "string",
+      "value": "hello"
+    }
+  }
+}

@@ -18,6 +18,7 @@ import getpass
 import importlib
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 from typing import Any, Sequence
@@ -176,6 +177,21 @@ def build_parser() -> argparse.ArgumentParser:
             "Install 'open-extensions' for all six, or 'open-extensions-<format>' for one."
         )
     formats = parser.add_subparsers(dest="format", required=True, metavar="format")
+
+    examples = formats.add_parser(
+        "examples",
+        help="List or copy the example files that ship with the SDK",
+    )
+    examples.add_argument(
+        "example_format",
+        choices=list(FORMATS),
+        help="Format whose examples to list",
+    )
+    examples.add_argument(
+        "--write",
+        metavar="DIR",
+        help="Copy the examples into DIR instead of printing their paths",
+    )
 
     builders = {
         "memx": _add_memx,
@@ -382,6 +398,39 @@ def _add_tlock(formats: Any) -> None:
 
 # --- command implementations ----------------------------------------------
 
+def _bundled_examples_dir() -> Path:
+    """The example files that ship inside the open-extensions-core package."""
+    return Path(__file__).resolve().parent / "examples"
+
+
+def _run_examples(args: argparse.Namespace) -> int:
+    """List the bundled example files, or copy them into a directory."""
+    root = _bundled_examples_dir()
+    if not root.is_dir():
+        raise CliError("this installation does not include the bundled examples")
+    target = root / args.example_format
+    if not target.is_dir():
+        raise CliError(f"there are no bundled examples for {args.example_format}")
+    files = sorted(path for path in target.rglob("*") if path.is_file())
+    if not files:
+        raise CliError(f"there are no bundled examples for {args.example_format}")
+    if args.write:
+        destination = Path(args.write)
+        # The format directory is kept, so the example paths in the
+        # documentation (memx/minimal.json, stepx/pancakes.json, ...) are
+        # the paths the user actually ends up with.
+        for path in files:
+            relative = path.relative_to(target)
+            output = destination / args.example_format / relative
+            output.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, output)
+            print(output)
+    else:
+        for path in files:
+            print(path)
+    return 0
+
+
 def _run_memx(args: argparse.Namespace) -> int:
     from .memx import inspect_memx, read_memx, validate_memx, write_memx
 
@@ -395,6 +444,8 @@ def _run_memx(args: argparse.Namespace) -> int:
         return 0
 
     if args.command == "read":
+        if not args.input.exists():
+            raise CliError(f"Cannot read MEMX file: {args.input} does not exist")
         payload = read_memx(args.input, _password())
         if args.output:
             _write_json(args.output, payload)
@@ -404,6 +455,8 @@ def _run_memx(args: argparse.Namespace) -> int:
         return 0
 
     if args.command == "validate":
+        if not args.input.exists():
+            raise CliError(f"Cannot read MEMX file: {args.input} does not exist")
         password = _password() if args.verify else None
         errors = validate_memx(args.input, password=password)
         if errors:
@@ -417,6 +470,8 @@ def _run_memx(args: argparse.Namespace) -> int:
         return 0
 
     if args.command == "inspect":
+        if not args.input.exists():
+            raise CliError(f"Cannot read MEMX file: {args.input} does not exist")
         _print_json(inspect_memx(args.input))
         return 0
     return 2
@@ -711,6 +766,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(arguments)
     try:
+        if args.format == "examples":
+            return _run_examples(args)
         return _RUNNERS[args.format](args)
     except (
         CliError,

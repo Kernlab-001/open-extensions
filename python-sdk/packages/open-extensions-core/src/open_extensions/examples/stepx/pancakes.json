@@ -1,0 +1,84 @@
+{
+  "format": "stepx",
+  "format_version": "0.1.0",
+  "title": "Pancakes",
+  "category": "recipe",
+  "base_yield": "4",
+  "yield_unit": "servings",
+  "ingredients": [
+    {
+      "id": "flour",
+      "name": "flour",
+      "quantity": "250",
+      "unit": "g"
+    },
+    {
+      "id": "milk",
+      "name": "milk",
+      "quantity": "500",
+      "unit": "ml"
+    },
+    {
+      "id": "eggs",
+      "name": "eggs",
+      "quantity": "2",
+      "unit": "item"
+    },
+    {
+      "id": "salt",
+      "name": "salt",
+      "quantity": "1",
+      "unit": "pinch",
+      "scale_mode": "fixed"
+    }
+  ],
+  "steps": [
+    {
+      "id": "mix",
+      "order": 1,
+      "title": "Mix the batter",
+      "instruction": "Whisk the flour, the milk and the eggs until smooth.",
+      "ingredient_refs": [
+        "flour",
+        "milk",
+        "eggs"
+      ],
+      "timer": {
+        "duration_seconds": 60,
+        "label": "Rest",
+        "start_policy": "manual"
+      }
+    },
+    {
+      "id": "cook",
+      "order": 2,
+      "title": "Cook",
+      "instruction": "Fry a ladle of batter per serving until golden.",
+      "requires": [
+        "mix"
+      ],
+      "ingredient_refs": [
+        "salt"
+      ],
+      "substitutions": [
+        {
+          "replaces": "milk",
+          "replacement": {
+            "id": "oat-milk",
+            "name": "oat milk",
+            "quantity": "500",
+            "unit": "ml"
+          },
+          "reason": "dairy free",
+          "when": [
+            {
+              "variable": "diet",
+              "operator": "eq",
+              "value": "vegan"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
